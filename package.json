@@ -1,0 +1,15 @@
+{
+  "name": "byeground",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Eliminación de fondos uniforme, privada y ejecutada íntegramente en el navegador.",
+  "scripts": {
+    "dev": "python3 -m http.server 4173",
+    "test": "node --test",
+    "check": "node --check src/main.js && node --check src/core/background-processor.js && node --check src/core/config.js && node --check src/core/math.js && node --check src/ui/comparison.js && node --check src/ui/controls.js && node --check src/ui/elements.js && node --check src/ui/file-input.js && node --check src/ui/png-export.js && node --check src/ui/theme.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
