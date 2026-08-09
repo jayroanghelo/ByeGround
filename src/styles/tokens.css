@@ -15,8 +15,7 @@
   --radius-large: 16px;
   --radius-medium: 12px;
   --shadow-panel: 0 10px 30px rgba(20, 24, 33, 0.1);
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  --font-sans: "Outfit", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 html[data-theme="dark"] {

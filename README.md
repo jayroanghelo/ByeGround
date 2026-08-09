@@ -1,48 +1,74 @@
-# Bye-Ground
+<p align="center">
+  <img src="favicon.svg" alt="Bye-Ground Logo" width="128" height="128" />
+</p>
 
-Bye-Ground elimina fondos de color uniforme directamente en el navegador. La imagen no se sube a ningún servidor y la exportación conserva la transparencia en PNG.
+<h1 align="center">Bye-Ground</h1>
 
-## Funcionalidades
+<p align="center">
+  <strong>Elimina fondos de forma privada y al instante, ejecutado íntegramente en tu navegador.</strong><br>
+  Sin servidores, sin demoras y conservando una transparencia de máxima calidad en PNG.
+</p>
 
-- Detección automática del color de fondo desde el perímetro.
-- Recorte por fondo conectado o por color global.
-- Antialias, contracción, feather y reconstrucción de bordes sin halo.
-- Varita conectada con el mismo matting subpíxel del motor, borrado, restauración y deshacer.
-- Comparador antes/después y fondos de previsualización.
-- Exportación PNG a resolución completa, con recorte opcional al contenido.
-- Tema claro/oscuro y controles accesibles por teclado.
+<p align="center">
+  <a href="#funcionalidades">Funcionalidades</a> •
+  <a href="#desarrollo-local">Desarrollo</a> •
+  <a href="#arquitectura">Arquitectura</a>
+</p>
 
-## Desarrollo local
+---
 
-Requiere Node.js 20 o superior y Python 3 para el servidor estático incluido en los scripts.
+## ✨ Funcionalidades
+
+- **🔒 100% Privado**: Las imágenes nunca salen de tu dispositivo, todo ocurre en el cliente mediante Web APIs.
+- **🎨 Detección inteligente de color**: Algoritmo que muestrea el perímetro (mediana) y recorta fondos conectados o por color global.
+- **✂️ Recorte de Alta Precisión**: Antialias, contracción del borde, desenfoque (feather) y reconstrucción sin el temido efecto "halo".
+- **🪄 Herramientas de retoque**: Varita mágica con matting subpíxel, pincel para borrar, herramienta de restauración total y sistema *Deshacer*.
+- **👁️ UI/UX Moderna**: Interfaz amigable de 2026, tipografía _Outfit_, modo oscuro/claro nativo, comparador visual antes/después y fondos previsualizables.
+- **🖼️ Exportación Optimizada**: Descarga tu PNG a resolución completa con la opción de auto-recortar al lienzo útil.
+
+## 🚀 Desarrollo local
+
+El entorno está preparado para ser ultra liviano. Requiere **Node.js 20+** y **Python 3** (para servir los estáticos localmente).
+
+1. **Clona el repositorio** y entra en el directorio.
+2. **Inicia el servidor local**:
 
 ```bash
 npm run dev
 ```
 
-Abre `http://localhost:4173`.
+El servidor estará disponible en `http://localhost:4173`.
 
-## Validación
+## 🧪 Validación y Pruebas
+
+Para asegurar la estabilidad del motor interno:
 
 ```bash
+# Ejecutar la suite de tests unitarios:
 npm test
+
+# Validar la sintaxis y tipos del código base:
 npm run check
 ```
 
-## Arquitectura
+## 🏗 Arquitectura del Proyecto
+
+El código está estructurado para una escalabilidad de componentes puros sin necesidad de pesados frameworks frontend:
 
 ```text
 .
-├── index.html                     # Estructura semántica de la interfaz
+├── favicon.svg                    # Logo y assets vectoriales
+├── index.html                     # Estructura semántica de la UI
 ├── src/
 │   ├── core/
-│   │   ├── background-processor.js # Pipeline y retoques de imagen
-│   │   ├── config.js               # Límites, valores iniciales y presets
-│   │   └── math.js                 # Utilidades puras reutilizables
-│   ├── styles/                     # Tokens, base, componentes y editor
-│   ├── ui/                         # Controles accesibles y tema
-│   └── main.js                     # Orquestación entre DOM y motor
-└── tests/                          # Pruebas unitarias del núcleo
+│   │   ├── background-processor.js # Motor principal: pipeline y retoques
+│   │   ├── config.js               # Límites, defaults y presets del motor
+│   │   └── math.js                 # Utilidades algorítmicas puras
+│   ├── styles/                     # Arquitectura CSS (Tokens, Base, Componentes)
+│   ├── ui/                         # Controladores accesibles (Modo oscuro, eventos)
+│   └── main.js                     # Orquestación central DOM <-> Motor
+└── tests/                          # Suite de pruebas automatizadas
 ```
 
-El modo de fondo complejo permanece visible como extensión futura para un modelo local WebGPU/WASM/ONNX, igual que en la versión original; no se simula con el motor cromático.
+> [!NOTE]  
+> **Extensibilidad futura (Fondo Complejo)**: La segmentación local para fotografías complejas está planteada en la arquitectura para integrar un modelo cliente (WebGPU / WASM / ONNX) en el futuro, manteniendo la filosofía *Zero-Server*.
