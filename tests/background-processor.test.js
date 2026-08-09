@@ -30,6 +30,25 @@ function outputAlpha(processor, x, y) {
   return processor.output[(y * processor.width + x) * 4 + 3];
 }
 
+function createAntialiasedHoleImage() {
+  const background = [255, 255, 255];
+  const hole = [32, 32, 34];
+  const subject = [220, 28, 48];
+
+  return createImageData(31, 31, (x, y) => {
+    if (x < 4 || x > 26 || y < 4 || y > 26) return [...background, 255];
+    if (x < 9 || x > 21 || y < 9 || y > 21) return [...subject, 255];
+
+    const subjectAlpha = Math.max(0, Math.min(1, (x + y - 27) / 4));
+    return [
+      Math.round(hole[0] * (1 - subjectAlpha) + subject[0] * subjectAlpha),
+      Math.round(hole[1] * (1 - subjectAlpha) + subject[1] * subjectAlpha),
+      Math.round(hole[2] * (1 - subjectAlpha) + subject[2] * subjectAlpha),
+      255,
+    ];
+  });
+}
+
 test("detecta el perímetro y elimina un fondo blanco conectado", () => {
   const processor = createProcessor();
   processor.loadImageData(
@@ -91,4 +110,67 @@ test("los retoques manuales se pueden deshacer sin copiar toda la imagen", () =>
   processor.applyUndo(stroke);
   processor.compose();
   assert.equal(outputAlpha(processor, 4, 4), 255);
+});
+
+test("la varita produce el mismo borde subpíxel que el motor automático", () => {
+  const parameters = {
+    tolerance: 30,
+    softness: 120,
+    sharpness: 25,
+    contraction: 1,
+    feather: 1,
+    despeckle: false,
+    spill: true,
+    spillAmount: 95,
+  };
+  const image = createAntialiasedHoleImage();
+
+  const wand = createProcessor(parameters);
+  wand.loadImageData(image);
+  const stroke = new Map();
+  wand.magicWand(10, 10, stroke);
+  wand.compose();
+
+  const automatic = createProcessor({ ...parameters, mode: "global" });
+  automatic.loadImageData(image);
+  automatic.setBackgroundAt(10, 10);
+  automatic.recompute();
+
+  let maximumAlphaDifference = 0;
+  let maximumColorDifference = 0;
+  let partiallyTransparentPixels = 0;
+  for (let y = 8; y <= 22; y += 1) {
+    for (let x = 8; x <= 22; x += 1) {
+      const wandAlpha = outputAlpha(wand, x, y);
+      const automaticAlpha = outputAlpha(automatic, x, y);
+      maximumAlphaDifference = Math.max(
+        maximumAlphaDifference,
+        Math.abs(wandAlpha - automaticAlpha),
+      );
+      if (wandAlpha > 0 && wandAlpha < 255) {
+        partiallyTransparentPixels += 1;
+        const offset = (y * wand.width + x) * 4;
+        for (let channel = 0; channel < 3; channel += 1) {
+          maximumColorDifference = Math.max(
+            maximumColorDifference,
+            Math.abs(wand.output[offset + channel] - automatic.output[offset + channel]),
+          );
+        }
+      }
+    }
+  }
+
+  assert.ok(partiallyTransparentPixels > 0, "la transición debe conservar antialias");
+  assert.ok(
+    maximumAlphaDifference <= 2,
+    `la diferencia máxima de alfa fue ${maximumAlphaDifference}`,
+  );
+  assert.ok(
+    maximumColorDifference <= 2,
+    `la diferencia máxima de color fue ${maximumColorDifference}`,
+  );
+
+  wand.applyUndo(stroke);
+  wand.compose();
+  assert.equal(outputAlpha(wand, 10, 10), 255, "deshacer debe restaurar el hueco original");
 });

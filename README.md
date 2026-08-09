@@ -7,7 +7,7 @@ Bye-Ground elimina fondos de color uniforme directamente en el navegador. La ima
 - Detección automática del color de fondo desde el perímetro.
 - Recorte por fondo conectado o por color global.
 - Antialias, contracción, feather y reconstrucción de bordes sin halo.
-- Varita, borrado, restauración y deshacer.
+- Varita conectada con el mismo matting subpíxel del motor, borrado, restauración y deshacer.
 - Comparador antes/después y fondos de previsualización.
 - Exportación PNG a resolución completa, con recorte opcional al contenido.
 - Tema claro/oscuro y controles accesibles por teclado.

@@ -1,0 +1,16 @@
+{
+  "name": "Bye-Ground",
+  "short_name": "Bye-Ground",
+  "description": "Quita fondos con un recorte limpio, 100% en tu navegador.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0f1115",
+  "theme_color": "#0f1115",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

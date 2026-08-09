@@ -16,6 +16,8 @@ export class BackgroundProcessor {
     this.originalAlpha = null;
     this.alpha = null;
     this.paint = null;
+    this.paintMatteKey = null;
+    this.matteColors = [[0, 0, 0]];
     this.output = null;
     this.backgroundColor = [0, 0, 0];
     this.backgroundVariation = 0;
@@ -50,6 +52,8 @@ export class BackgroundProcessor {
 
     this.alpha = new Float32Array(this.pixelCount);
     this.paint = new Float32Array(this.pixelCount);
+    this.paintMatteKey = new Uint16Array(this.pixelCount);
+    this.matteColors = [[0, 0, 0]];
     this.output = new Uint8ClampedArray(this.pixelCount * 4);
     this.scratchFloatA = new Float32Array(this.pixelCount);
     this.scratchFloatB = new Float32Array(this.pixelCount);
@@ -181,6 +185,43 @@ export class BackgroundProcessor {
       let effectiveAlpha = alpha * originalAlpha;
       const manualPaint = this.paint[index];
       if (manualPaint > 0) {
+        // La varita guarda su color de fondo local. Así puede aplicar la misma
+        // reconstrucción de primer plano que el motor automático en el borde
+        // semitransparente, incluso cuando el flood conservó un hueco interior.
+        const manualAlpha = 1 - manualPaint;
+        const matteKey = this.paintMatteKey[index];
+        if (reconstructEdge && matteKey && manualAlpha > 0.06 && manualAlpha < 0.97) {
+          const inverseManualAlpha = 1 - manualAlpha;
+          const [localBackgroundRed, localBackgroundGreen, localBackgroundBlue] =
+            this.matteColors[matteKey];
+          red = clamp(
+            red +
+              ((this.original[offset] - localBackgroundRed * inverseManualAlpha) /
+                manualAlpha -
+                red) *
+                strength,
+            0,
+            255,
+          );
+          green = clamp(
+            green +
+              ((this.original[offset + 1] - localBackgroundGreen * inverseManualAlpha) /
+                manualAlpha -
+                green) *
+                strength,
+            0,
+            255,
+          );
+          blue = clamp(
+            blue +
+              ((this.original[offset + 2] - localBackgroundBlue * inverseManualAlpha) /
+                manualAlpha -
+                blue) *
+                strength,
+            0,
+            255,
+          );
+        }
         effectiveAlpha *= 1 - manualPaint;
       } else if (manualPaint < 0) {
         const restoreAmount = -manualPaint;
@@ -205,12 +246,22 @@ export class BackgroundProcessor {
   clearPaint() {
     this.#assertReady();
     this.paint.fill(0);
+    this.paintMatteKey.fill(0);
+    this.matteColors = [[0, 0, 0]];
   }
 
   applyUndo(stroke) {
     if (!stroke) return;
     stroke.forEach((previousValue, index) => {
-      this.paint[index] = previousValue;
+      // Se aceptan números para mantener compatibilidad con trazos guardados
+      // por versiones anteriores del motor.
+      if (typeof previousValue === "number") {
+        this.paint[index] = previousValue;
+        this.paintMatteKey[index] = 0;
+        return;
+      }
+      this.paint[index] = previousValue.paint;
+      this.paintMatteKey[index] = previousValue.matteKey;
     });
   }
 
@@ -238,27 +289,32 @@ export class BackgroundProcessor {
   magicWand(startX, startY, stroke) {
     this.#assertReady();
     const startOffset = (startY * this.width + startX) * 4;
-    const red = this.original[startOffset];
-    const green = this.original[startOffset + 1];
-    const blue = this.original[startOffset + 2];
+    const backgroundColor = [
+      this.original[startOffset],
+      this.original[startOffset + 1],
+      this.original[startOffset + 2],
+    ];
     const innerThreshold = this.parameters.tolerance;
     const outerThreshold = innerThreshold + Math.max(1, this.parameters.softness);
     const squaredOuterThreshold = outerThreshold * outerThreshold;
-    const selected = this.scratchByteA;
-    selected.fill(0);
+    const refinement = this.parameters.sharpness / 100;
+    const regionState = this.scratchByteA;
+    const pureSelected = this.scratchByteB;
+    regionState.fill(0);
+    pureSelected.fill(0);
 
     const stack = new Int32Array(this.pixelCount);
     let stackPointer = 0;
     const startIndex = startY * this.width + startX;
-    selected[startIndex] = 1;
+    regionState[startIndex] = 1;
     stack[stackPointer++] = startIndex;
 
     while (stackPointer) {
       const index = stack[--stackPointer];
       const offset = index * 4;
-      const redDistance = this.original[offset] - red;
-      const greenDistance = this.original[offset + 1] - green;
-      const blueDistance = this.original[offset + 2] - blue;
+      const redDistance = this.original[offset] - backgroundColor[0];
+      const greenDistance = this.original[offset + 1] - backgroundColor[1];
+      const blueDistance = this.original[offset + 2] - backgroundColor[2];
 
       if (
         redDistance * redDistance +
@@ -266,15 +322,15 @@ export class BackgroundProcessor {
           blueDistance * blueDistance >
         squaredOuterThreshold
       ) {
-        selected[index] = 0;
+        regionState[index] = 2;
         continue;
       }
 
       const x = index % this.width;
       const y = (index / this.width) | 0;
       const push = (neighbor) => {
-        if (selected[neighbor]) return;
-        selected[neighbor] = 1;
+        if (regionState[neighbor]) return;
+        regionState[neighbor] = 1;
         stack[stackPointer++] = neighbor;
       };
 
@@ -295,29 +351,47 @@ export class BackgroundProcessor {
     const amount = this.scratchFloatB;
     let selectedCount = 0;
     for (let index = 0; index < this.pixelCount; index += 1) {
-      if (!selected[index]) {
+      if (regionState[index] !== 1) {
         amount[index] = 0;
         continue;
       }
 
       const offset = index * 4;
-      const redDistance = this.original[offset] - red;
-      const greenDistance = this.original[offset + 1] - green;
-      const blueDistance = this.original[offset + 2] - blue;
-      amount[index] =
-        1 -
-        smoothstep(
-          innerThreshold,
-          outerThreshold,
-          Math.hypot(redDistance, greenDistance, blueDistance),
-        );
+      const distance = Math.hypot(
+        this.original[offset] - backgroundColor[0],
+        this.original[offset + 1] - backgroundColor[1],
+        this.original[offset + 2] - backgroundColor[2],
+      );
+      let subjectAlpha = smoothstep(innerThreshold, outerThreshold, distance);
+      if (refinement > 0) {
+        subjectAlpha += (smooth01(subjectAlpha) - subjectAlpha) * refinement;
+      }
+      amount[index] = 1 - subjectAlpha;
+      pureSelected[index] = distance <= innerThreshold ? 1 : 0;
       selectedCount += 1;
     }
 
-    this.#boxBlur(amount, Math.max(1, (this.parameters.feather | 0) + 1));
+    // El complemento de erosionar alfa es dilatar la máscara de borrado.
+    // Aplicar después el mismo feather hace que la varita sea matemáticamente
+    // equivalente al motor automático, pero limitada a esta región conectada.
+    if (this.parameters.contraction > 0) {
+      this.#dilateFloat(amount, this.parameters.contraction);
+    }
+    if (this.parameters.feather > 0) {
+      this.#boxBlur(amount, this.parameters.feather);
+    }
+
+    const matteKey = this.#registerMatteColor(backgroundColor);
     for (let index = 0; index < this.pixelCount; index += 1) {
+      if (pureSelected[index]) amount[index] = 1;
       if (amount[index] > 0.004) {
-        this.#setPaint(index, Math.min(amount[index], 1), true, stroke);
+        this.#setPaint(
+          index,
+          Math.min(amount[index], 1),
+          true,
+          stroke,
+          matteKey,
+        );
       }
     }
 
@@ -450,6 +524,35 @@ export class BackgroundProcessor {
     }
   }
 
+  #dilateFloat(values, radius) {
+    const temporary = this.scratchFloatA;
+    for (let y = 0; y < this.height; y += 1) {
+      for (let x = 0; x < this.width; x += 1) {
+        let maximum = 0;
+        for (let offset = -radius; offset <= radius; offset += 1) {
+          const sampleX = x + offset;
+          if (sampleX >= 0 && sampleX < this.width) {
+            maximum = Math.max(maximum, values[y * this.width + sampleX]);
+          }
+        }
+        temporary[y * this.width + x] = maximum;
+      }
+    }
+
+    for (let x = 0; x < this.width; x += 1) {
+      for (let y = 0; y < this.height; y += 1) {
+        let maximum = 0;
+        for (let offset = -radius; offset <= radius; offset += 1) {
+          const sampleY = y + offset;
+          if (sampleY >= 0 && sampleY < this.height) {
+            maximum = Math.max(maximum, temporary[sampleY * this.width + x]);
+          }
+        }
+        values[y * this.width + x] = maximum;
+      }
+    }
+  }
+
   #boxBlur(values, radius) {
     const temporary = this.scratchFloatA;
     const windowSize = 2 * radius + 1;
@@ -573,11 +676,61 @@ export class BackgroundProcessor {
     return smooth01(1 - (distance - innerRadius) / (radius - innerRadius));
   }
 
-  #setPaint(index, target, erase, stroke) {
-    if (stroke && !stroke.has(index)) stroke.set(index, this.paint[index]);
-    this.paint[index] = erase
-      ? Math.max(this.paint[index], target)
-      : Math.min(this.paint[index], -target);
+  #registerMatteColor(color) {
+    const existingKey = this.matteColors.findIndex(
+      ([red, green, blue]) => red === color[0] && green === color[1] && blue === color[2],
+    );
+    if (existingKey > 0) return existingKey;
+
+    // Uint16 reserva 0 para “sin matting”. Es prácticamente inalcanzable en
+    // uso real, pero si se agota la paleta reutilizamos el color más próximo.
+    if (this.matteColors.length >= 65_535) {
+      let nearestKey = 1;
+      let nearestDistance = Number.POSITIVE_INFINITY;
+      for (let key = 1; key < this.matteColors.length; key += 1) {
+        const candidate = this.matteColors[key];
+        const distance = Math.hypot(
+          candidate[0] - color[0],
+          candidate[1] - color[1],
+          candidate[2] - color[2],
+        );
+        if (distance < nearestDistance) {
+          nearestKey = key;
+          nearestDistance = distance;
+        }
+      }
+      return nearestKey;
+    }
+
+    this.matteColors.push(color.slice());
+    return this.matteColors.length - 1;
+  }
+
+  #setPaint(index, target, erase, stroke, matteKey = 0) {
+    if (stroke && !stroke.has(index)) {
+      stroke.set(index, {
+        paint: this.paint[index],
+        matteKey: this.paintMatteKey[index],
+      });
+    }
+
+    const previousPaint = this.paint[index];
+    if (erase) {
+      this.paint[index] = Math.max(previousPaint, target);
+      if (target < previousPaint) return;
+
+      if (matteKey) {
+        this.paintMatteKey[index] = matteKey;
+      } else {
+        // Un trazo de borrador que domina el píxel no debe heredar el color
+        // local de una selección anterior de la varita.
+        this.paintMatteKey[index] = 0;
+      }
+      return;
+    }
+
+    this.paint[index] = Math.min(previousPaint, -target);
+    if (this.paint[index] < 0) this.paintMatteKey[index] = 0;
   }
 
   #assertReady() {
