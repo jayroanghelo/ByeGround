@@ -14,7 +14,12 @@ function getPreferredTheme() {
 export function initializeTheme(toggle, icon) {
   const applyTheme = (theme) => {
     document.documentElement.dataset.theme = theme;
-    icon.textContent = theme === "dark" ? "☾" : "☀";
+    const use = icon.querySelector("use");
+    use?.setAttribute("href", theme === "dark" ? "#icon-moon" : "#icon-sun");
+    toggle.setAttribute(
+      "aria-label",
+      theme === "dark" ? "Cambiar al tema claro" : "Cambiar al tema oscuro",
+    );
 
     try {
       localStorage.setItem(STORAGE_KEY, theme);

@@ -5,32 +5,72 @@
 }
 
 html {
+  min-width: 320px;
   font-size: 16px;
 }
 
 body {
+  min-height: 100vh;
   margin: 0;
-  background: var(--color-bg);
+  background:
+    radial-gradient(circle at 18% 0%, var(--color-accent-soft), transparent 28rem),
+    var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-sans);
-  line-height: 1.55;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
 button,
-input {
+input,
+summary {
   font: inherit;
 }
 
-:where(button, input, a, [tabindex]):focus-visible {
+button,
+summary {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+input:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
   border-radius: 8px;
   outline: 3px solid var(--color-focus);
   outline-offset: 2px;
 }
 
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
 [hidden] {
   display: none !important;
+}
+
+.icon-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.icon {
+  width: 1.15em;
+  height: 1.15em;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.grow {
+  flex: 1;
 }
 
 .visually-hidden {
@@ -45,20 +85,6 @@ input {
   border: 0;
 }
 
-.grow {
-  flex: 1;
-}
-
-.inline-help {
-  display: inline;
-  font-weight: 400;
-}
-
-.block-help {
-  display: block;
-  margin: 0;
-}
-
 .flush-top {
   margin-top: 0 !important;
 }
@@ -68,7 +94,8 @@ input {
   *::before,
   *::after {
     scroll-behavior: auto !important;
-    transition: none !important;
-    animation: none !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }

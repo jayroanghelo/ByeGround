@@ -112,6 +112,29 @@ test("los retoques manuales se pueden deshacer sin copiar toda la imagen", () =>
   assert.equal(outputAlpha(processor, 4, 4), 255);
 });
 
+test("acepta una máscara automática y conserva los retoques manuales", () => {
+  const processor = createProcessor();
+  processor.loadImageData(
+    createImageData(5, 5, () => [80, 120, 180, 255]),
+  );
+
+  const matte = new Float32Array(25).fill(1);
+  matte[12] = 0.35;
+  processor.applyAlphaMatte(matte);
+
+  assert.equal(processor.parameters.matte, "automatic");
+  assert.ok(Math.abs(outputAlpha(processor, 2, 2) - 89) <= 1);
+
+  const stroke = new Map();
+  processor.stampBrush(2, 2, 1, 1, "restore", stroke);
+  processor.compose();
+  assert.equal(outputAlpha(processor, 2, 2), 255);
+
+  processor.applyUndo(stroke);
+  processor.compose();
+  assert.ok(Math.abs(outputAlpha(processor, 2, 2) - 89) <= 1);
+});
+
 test("la varita produce el mismo borde subpíxel que el motor automático", () => {
   const parameters = {
     tolerance: 30,

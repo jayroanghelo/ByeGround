@@ -128,6 +128,10 @@ export class BackgroundProcessor {
 
   recompute() {
     this.#assertReady();
+    if (this.parameters.matte === "automatic") {
+      this.compose();
+      return true;
+    }
     if (this.parameters.matte !== "uniform") {
       this.output.set(this.original);
       return false;
@@ -140,20 +144,25 @@ export class BackgroundProcessor {
 
   compose() {
     this.#assertReady();
-    if (this.parameters.matte !== "uniform") {
+    const automaticMode = this.parameters.matte === "automatic";
+    if (!automaticMode && this.parameters.matte !== "uniform") {
       this.output.set(this.original);
       return;
     }
 
     const [backgroundRed, backgroundGreen, backgroundBlue] = this.backgroundColor;
     const strength = this.parameters.spillAmount / 100;
-    const reconstructEdge = this.parameters.spill;
+    const reconstructEdge = this.parameters.spill && !automaticMode;
     const globalMode = this.parameters.mode === "global";
 
     for (let index = 0; index < this.pixelCount; index += 1) {
       const offset = index * 4;
       let alpha = this.alpha[index];
-      if (this.pureBackground[index] && (globalMode || this.backgroundConnected[index])) {
+      if (
+        !automaticMode &&
+        this.pureBackground[index] &&
+        (globalMode || this.backgroundConnected[index])
+      ) {
         alpha = 0;
       }
 
@@ -236,6 +245,26 @@ export class BackgroundProcessor {
       this.output[offset + 2] = blue;
       this.output[offset + 3] = clamp(Math.round(effectiveAlpha * 255), 0, 255);
     }
+  }
+
+  /**
+   * Instala una máscara externa normalizada (0..1), por ejemplo la generada
+   * por un modelo de segmentación. La composición y los retoques manuales
+   * siguen pasando por el mismo pipeline que el recorte cromático.
+   */
+  applyAlphaMatte(values) {
+    this.#assertReady();
+    if (!values || values.length !== this.pixelCount) {
+      throw new TypeError("La máscara debe coincidir con las dimensiones de la imagen.");
+    }
+
+    for (let index = 0; index < this.pixelCount; index += 1) {
+      this.alpha[index] = clamp(Number(values[index]) || 0, 0, 1);
+    }
+    this.parameters.matte = "automatic";
+    this.backgroundConnected.fill(0);
+    this.pureBackground.fill(0);
+    this.compose();
   }
 
   contentBounds() {

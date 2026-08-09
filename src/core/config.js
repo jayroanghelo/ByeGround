@@ -1,5 +1,6 @@
 export const MAX_IMAGE_DIMENSION = 4096;
 export const UNIFORM_BACKGROUND_THRESHOLD = 42;
+export const SUBJECT_PROTECTION_VARIATION_THRESHOLD = 18;
 export const MAX_UNDO_STEPS = 40;
 
 export const DEFAULT_PARAMETERS = Object.freeze({

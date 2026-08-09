@@ -5,387 +5,319 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Bye-Ground elimina el fondo de ilustraciones y logos con un recorte limpio, privado y ejecutado íntegramente en tu navegador."
+      content="Bye-Ground elimina fondos automáticamente con IA local y permite perfeccionar el recorte sin subir tus imágenes."
     />
-    <meta name="theme-color" content="#0f1115" />
-    <title>Bye-Ground — quita fondos con un recorte limpio</title>
+    <meta name="theme-color" content="#0b0d11" />
+    <title>Bye-Ground — elimina fondos automáticamente</title>
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./favicon.svg" />
     <link rel="manifest" href="./site.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="./src/styles/index.css" />
     <script type="module" src="./src/main.js"></script>
   </head>
 
   <body>
+    <svg class="icon-sprite" aria-hidden="true">
+      <symbol id="icon-upload" viewBox="0 0 24 24">
+        <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 15v4a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-4" />
+      </symbol>
+      <symbol id="icon-download" viewBox="0 0 24 24">
+        <path d="M12 4v12m0 0 4.5-4.5M12 16l-4.5-4.5M5 20h14" />
+      </symbol>
+      <symbol id="icon-image" viewBox="0 0 24 24">
+        <rect x="3" y="4" width="18" height="16" rx="3" /><circle cx="9" cy="10" r="2" /><path d="m5 18 4.5-4.5 3 3 2.5-2.5 4 4" />
+      </symbol>
+      <symbol id="icon-sparkles" viewBox="0 0 24 24">
+        <path d="m12 3 .9 3.1A6 6 0 0 0 17 10l3 1-3 1a6 6 0 0 0-4.1 3.9L12 19l-.9-3.1A6 6 0 0 0 7 12l-3-1 3-1a6 6 0 0 0 4.1-3.9L12 3Z" /><path d="m19 3 .35 1.15A2.5 2.5 0 0 0 21 5.8l1 .3-1 .35a2.5 2.5 0 0 0-1.65 1.65L19 9l-.35-.9A2.5 2.5 0 0 0 17 6.45l-1-.35 1-.3a2.5 2.5 0 0 0 1.65-1.65L19 3Z" />
+      </symbol>
+      <symbol id="icon-shield" viewBox="0 0 24 24">
+        <path d="M12 3 5 6v5c0 4.8 2.8 8 7 10 4.2-2 7-5.2 7-10V6l-7-3Z" /><path d="m9 12 2 2 4-4" />
+      </symbol>
+      <symbol id="icon-cursor" viewBox="0 0 24 24">
+        <path d="m6 3 12 9-6 1-3 5-3-15Z" />
+      </symbol>
+      <symbol id="icon-wand" viewBox="0 0 24 24">
+        <path d="m4 20 11-11m-8.5 7.5 3 3M16 3v3m-1.5-1.5h3M20 9v3m-1.5-1.5h3M10 3v2M9 4h2" />
+      </symbol>
+      <symbol id="icon-erase" viewBox="0 0 24 24">
+        <path d="m7.5 18.5-3-3a2 2 0 0 1 0-2.8l8-8a2 2 0 0 1 2.8 0l4 4a2 2 0 0 1 0 2.8l-7 7h-4.8Z" /><path d="m10 7 7 7M8 19h12" />
+      </symbol>
+      <symbol id="icon-restore" viewBox="0 0 24 24">
+        <path d="M4 12a8 8 0 1 0 2.3-5.7L4 8.5M4 4v4.5h4.5" /><path d="M12 8v4l2.5 1.5" />
+      </symbol>
+      <symbol id="icon-undo" viewBox="0 0 24 24">
+        <path d="M9 7 4 12l5 5M5 12h8a6 6 0 0 1 6 6" />
+      </symbol>
+      <symbol id="icon-refresh" viewBox="0 0 24 24">
+        <path d="M20 7v5h-5M4 17v-5h5" /><path d="M18.5 9A7 7 0 0 0 6 6.5L4 9m2 6a7 7 0 0 0 12.5 2.5L20 15" />
+      </symbol>
+      <symbol id="icon-chevron" viewBox="0 0 24 24"><path d="m8 10 4 4 4-4" /></symbol>
+      <symbol id="icon-moon" viewBox="0 0 24 24"><path d="M20 15.5A8 8 0 0 1 8.5 4 8 8 0 1 0 20 15.5Z" /></symbol>
+      <symbol id="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></symbol>
+      <symbol id="icon-grid" viewBox="0 0 24 24"><path d="M4 4h16v16H4zM12 4v16M4 12h16" /></symbol>
+      <symbol id="icon-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" /></symbol>
+      <symbol id="icon-eyedropper" viewBox="0 0 24 24"><path d="m19 3 2 2-10.5 10.5-4 1 1-4L18 2l1 1Z" /><path d="m14 6 4 4M5 19l-2 2" /></symbol>
+      <symbol id="icon-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6" /></symbol>
+    </svg>
+
     <header class="topbar">
-      <div class="brand">
-        <span class="brand__logo" aria-hidden="true">
-          <img src="./favicon.svg" alt="" width="32" height="32" style="border-radius: 8px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.2));" />
-        </span>
-        <div>
-          <h1>Bye-Ground</h1>
-          <p>Adiós al fondo · recorte limpio, 100% en tu navegador</p>
-        </div>
-      </div>
+      <a class="brand" href="./" aria-label="Bye-Ground, inicio">
+        <span class="brand__logo" aria-hidden="true"><img src="./favicon.svg" alt="" /></span>
+        <span class="brand__wordmark">Bye-Ground</span>
+      </a>
+      <span class="privacy-badge">
+        <svg class="icon"><use href="#icon-shield" /></svg>
+        Procesamiento local
+      </span>
       <div class="grow"></div>
       <button
-        class="button button--icon"
+        class="button button--icon tooltip"
         id="themeToggle"
         type="button"
         aria-label="Cambiar entre tema claro y oscuro"
-        title="Tema claro/oscuro"
+        data-tooltip="Tema claro u oscuro"
       >
-        <span id="themeIcon" aria-hidden="true">☾</span>
+        <svg class="icon" id="themeIcon"><use href="#icon-moon" /></svg>
       </button>
       <button class="button button--primary" id="downloadHeader" type="button" disabled>
-        <svg
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M12 3v12" />
-          <path d="m7 12 5 5 5-5" />
-          <path d="M5 21h14" />
-        </svg>
+        <svg class="icon"><use href="#icon-download" /></svg>
         Descargar PNG
       </button>
     </header>
 
     <main class="app-shell">
-      <section id="emptyState" class="stack" aria-labelledby="uploadTitle">
+      <section id="emptyState" class="hero" aria-labelledby="uploadTitle">
+        <div class="hero__eyebrow">
+          <svg class="icon"><use href="#icon-sparkles" /></svg>
+          Recorte automático con IA local
+        </div>
+        <h1 id="uploadTitle">Quita el fondo.<br /><span>Eso es todo.</span></h1>
+        <p class="hero__lead">
+          Sube una imagen y Bye-Ground separará el sujeto automáticamente, incluso con pelo,
+          objetos y fondos complejos.
+        </p>
         <div
           class="drop-zone"
           id="dropZone"
           role="button"
           tabindex="0"
-          aria-label="Cargar una imagen: haz clic o arrastra un archivo"
+          aria-label="Seleccionar o arrastrar una imagen"
         >
-          <span class="drop-zone__icon" aria-hidden="true">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M12 5v14M5 12h14" />
-            </svg>
+          <span class="drop-zone__glow" aria-hidden="true"></span>
+          <span class="button button--primary button--hero" aria-hidden="true">
+            <svg class="icon"><use href="#icon-upload" /></svg>
+            Seleccionar imagen
           </span>
-          <h2 class="drop-zone__title" id="uploadTitle">Arrastra una imagen o haz clic</h2>
-          <p class="drop-zone__description">
-            PNG, JPG y WEBP · ideal para ilustraciones y logos sobre fondo de color
-          </p>
-          <div class="feature-list" aria-label="Ventajas">
-            <span>🔒 Nada se sube a internet</span>
-            <span>⚡ Al instante</span>
-            <span>✂️ Bordes suaves y sin halo</span>
-          </div>
+          <span>o arrástrala aquí</span>
+          <small>PNG, JPG o WEBP · hasta 4096 px</small>
+        </div>
+        <div class="trust-row" aria-label="Ventajas de Bye-Ground">
+          <span><svg class="icon"><use href="#icon-shield" /></svg> Tu imagen no sale del navegador</span>
+          <span><svg class="icon"><use href="#icon-sparkles" /></svg> Detecta fondos complejos</span>
+          <span><svg class="icon"><use href="#icon-check" /></svg> PNG transparente listo</span>
         </div>
       </section>
 
       <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp,image/*" hidden />
 
       <div id="editor" class="workspace" hidden>
-        <div class="card">
-          <section class="step" aria-labelledby="backgroundStepTitle">
-            <div class="step__header">
-              <span class="step__number" aria-hidden="true">1</span>
-              <h2 id="backgroundStepTitle">Ajusta el fondo</h2>
+        <aside class="editor-panel card" aria-label="Herramientas de edición">
+          <div class="panel-section panel-section--result">
+            <div class="section-heading">
+              <div>
+                <span class="eyebrow">Resultado</span>
+                <h2>Recorte automático</h2>
+              </div>
+              <span class="engine-dot" id="engineDot" aria-hidden="true"></span>
             </div>
-            <div class="step__body">
-              <span class="field-label flush-top" id="matteModeLabel">Modo</span>
-              <div class="segmented-control" id="matteMode" aria-labelledby="matteModeLabel">
-                <button type="button" data-value="uniform" class="active">Fondo uniforme</button>
-                <button type="button" data-value="complex">Fondo complejo</button>
+            <div class="engine-status" id="engineStatus">
+              <span class="engine-status__icon">
+                <svg class="icon"><use href="#icon-sparkles" /></svg>
+              </span>
+              <span>
+                <strong id="engineStatusTitle">IA local</strong>
+                <small id="engineStatusDetail">Preparada para analizar la imagen</small>
+              </span>
+              <button class="button button--icon button--quiet tooltip" id="aiRetry" type="button" hidden aria-label="Reintentar recorte automático" data-tooltip="Reintentar">
+                <svg class="icon"><use href="#icon-refresh" /></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="panel-section">
+            <div class="section-heading section-heading--compact">
+              <div>
+                <span class="eyebrow">Perfeccionar</span>
+                <h2>Retoque rápido</h2>
+              </div>
+              <span class="info-dot tooltip" tabindex="0" data-tooltip="La varita quita huecos. Borrar y restaurar permiten pintar sobre el borde." aria-label="Ayuda sobre las herramientas">?</span>
+            </div>
+            <div class="tool-grid" id="tool" aria-label="Herramienta de retoque">
+              <button type="button" data-value="none" class="active tooltip" data-tooltip="Mover y comparar (V)" aria-label="Mover">
+                <svg class="icon"><use href="#icon-cursor" /></svg><span>Mover</span>
+              </button>
+              <button type="button" data-value="wand" class="tooltip" data-tooltip="Quitar una zona con un clic (W)" aria-label="Varita">
+                <svg class="icon"><use href="#icon-wand" /></svg><span>Varita</span>
+              </button>
+              <button type="button" data-value="erase" class="tooltip" data-tooltip="Borrar con pincel (B)" aria-label="Borrar">
+                <svg class="icon"><use href="#icon-erase" /></svg><span>Borrar</span>
+              </button>
+              <button type="button" data-value="restore" class="tooltip" data-tooltip="Recuperar partes del sujeto (R)" aria-label="Restaurar">
+                <svg class="icon"><use href="#icon-restore" /></svg><span>Restaurar</span>
+              </button>
+            </div>
+
+            <div class="brush-controls" id="brushControls" hidden>
+              <label class="compact-range" for="brushSize">
+                <span>Tamaño</span>
+                <input type="range" id="brushSize" min="6" max="240" value="44" />
+                <output id="brushSizeValue" for="brushSize">44</output>
+              </label>
+              <label class="compact-range" for="brushHardness">
+                <span>Dureza</span>
+                <input type="range" id="brushHardness" min="0" max="100" value="60" />
+                <output id="brushHardnessValue" for="brushHardness">60</output>
+              </label>
+            </div>
+
+            <div class="secondary-actions">
+              <button class="button button--small" id="undo" type="button" disabled>
+                <svg class="icon"><use href="#icon-undo" /></svg> Deshacer
+              </button>
+              <button class="button button--small button--quiet" id="clearRetouch" type="button">Limpiar</button>
+            </div>
+          </div>
+
+          <details class="advanced" id="advancedPanel">
+            <summary>
+              <span>Ajustes avanzados</span>
+              <svg class="icon"><use href="#icon-chevron" /></svg>
+            </summary>
+            <div class="advanced__body">
+              <span class="field-label flush-top" id="processingModeLabel">Método de recorte</span>
+              <div class="segmented-control" id="processingMode" aria-labelledby="processingModeLabel">
+                <button type="button" data-value="automatic" class="active">Automático IA</button>
+                <button type="button" data-value="uniform">Color plano</button>
               </div>
 
-              <div id="uniformPanel">
-                <span class="field-label" id="presetLabel">Preajuste</span>
+              <div id="uniformPanel" hidden>
+                <span class="field-label" id="presetLabel">Acabado</span>
                 <div class="segmented-control" id="preset" aria-labelledby="presetLabel">
-                  <button type="button" data-value="crisp" class="active">Ilustración nítida</button>
+                  <button type="button" data-value="crisp" class="active">Nítido</button>
                   <button type="button" data-value="soft">Suave</button>
                 </div>
 
-                <span class="field-label" id="backgroundColorLabel">Color del fondo a quitar</span>
+                <span class="field-label" id="backgroundColorLabel">Fondo detectado</span>
                 <div class="field-row" role="group" aria-labelledby="backgroundColorLabel">
                   <span class="color-swatch" id="colorSwatch" aria-hidden="true"></span>
                   <span class="hex-value" id="hexValue" aria-live="polite">#000000</span>
                   <div class="grow"></div>
-                  <button
-                    class="button button--small"
-                    id="colorPicker"
-                    type="button"
-                    aria-pressed="false"
-                  >
-                    🎯 Cuentagotas
+                  <button class="button button--small" id="colorPicker" type="button" aria-pressed="false">
+                    <svg class="icon"><use href="#icon-eyedropper" /></svg> Elegir
                   </button>
                 </div>
-                <p class="help">
-                  Se detecta muestreando todo el perímetro (mediana). Con el cuentagotas activo,
-                  pincha el fondo para afinarlo.
-                </p>
-                <p class="warning" id="backgroundWarning">
-                  ⚠ El fondo no parece uniforme; el modo cromático puede dejar restos. Prueba el
-                  cuentagotas, o usa “Fondo complejo” cuando esté disponible.
-                </p>
+                <p class="warning" id="backgroundWarning">El fondo varía bastante; el modo automático dará mejor resultado.</p>
 
-                <span class="field-label" id="removalModeLabel">Qué quitar</span>
+                <span class="field-label" id="removalModeLabel">Zona</span>
                 <div class="segmented-control" id="removalMode" aria-labelledby="removalModeLabel">
-                  <button type="button" data-value="flood" class="active">Fondo de los bordes</button>
+                  <button type="button" data-value="flood" class="active">Conectada</button>
                   <button type="button" data-value="global">Todo el color</button>
                 </div>
-                <p class="help" id="removalModeHint">
-                  Quita solo el fondo pegado a los bordes; conserva ese color dentro del dibujo.
-                  Sella aberturas finas del contorno.
-                </p>
+                <p class="visually-hidden" id="removalModeHint">Quita el fondo conectado a los bordes.</p>
 
                 <label class="field-label" for="tolerance">Tolerancia</label>
-                <div class="range-row">
-                  <input
-                    type="range"
-                    id="tolerance"
-                    min="0"
-                    max="200"
-                    value="50"
-                    aria-describedby="toleranceHelp"
-                  />
-                  <output class="range-value" id="toleranceValue" for="tolerance">50</output>
-                </div>
-                <p class="help" id="toleranceHelp">
-                  Cuánto se parece un color al fondo para considerarlo fondo.
-                </p>
+                <div class="range-row"><input type="range" id="tolerance" min="0" max="200" value="50" /><output class="range-value" id="toleranceValue" for="tolerance">50</output></div>
+                <label class="field-label" for="softness">Suavidad de borde</label>
+                <div class="range-row"><input type="range" id="softness" min="1" max="120" value="40" /><output class="range-value" id="softnessValue" for="softness">40</output></div>
+                <label class="field-label" for="sharpness">Definición</label>
+                <div class="range-row"><input type="range" id="sharpness" min="0" max="100" value="25" /><output class="range-value" id="sharpnessValue" for="sharpness">25</output></div>
+                <label class="field-label" for="contraction">Contraer borde</label>
+                <div class="range-row"><input type="range" id="contraction" min="0" max="2" step="1" value="1" /><output class="range-value" id="contractionValue" for="contraction">1</output></div>
+                <label class="field-label" for="feather">Difuminar máscara</label>
+                <div class="range-row"><input type="range" id="feather" min="0" max="3" step="1" value="1" /><output class="range-value" id="featherValue" for="feather">1</output></div>
 
-                <label class="field-label" for="softness">Suavizado (antialias)</label>
-                <div class="range-row">
-                  <input type="range" id="softness" min="1" max="120" value="40" />
-                  <output class="range-value" id="softnessValue" for="softness">40</output>
-                </div>
-
-                <label class="field-label" for="sharpness">Nitidez de borde</label>
-                <div class="range-row">
-                  <input
-                    type="range"
-                    id="sharpness"
-                    min="0"
-                    max="100"
-                    value="25"
-                    aria-describedby="sharpnessHelp"
-                  />
-                  <output class="range-value" id="sharpnessValue" for="sharpness">25</output>
-                </div>
-                <p class="help" id="sharpnessHelp">
-                  Refina el borde (curva S suave) sin volverlo dentado; conserva el antialias.
-                </p>
-
-                <label class="field-label" for="contraction">Contracción del borde (px)</label>
-                <div class="range-row">
-                  <input type="range" id="contraction" min="0" max="2" step="1" value="1" />
-                  <output class="range-value" id="contractionValue" for="contraction">1</output>
-                </div>
-
-                <label class="field-label" for="feather">Desenfoque de máscara (px)</label>
-                <div class="range-row">
-                  <input type="range" id="feather" min="0" max="3" step="1" value="1" />
-                  <output class="range-value" id="featherValue" for="feather">1</output>
-                </div>
-
-                <div class="check-field">
-                  <input type="checkbox" id="despeckle" checked />
-                  <label for="despeckle">Quitar motas y tapar micro-huecos</label>
-                </div>
-
-                <div class="check-field">
-                  <input type="checkbox" id="spill" checked />
-                  <label for="spill">
-                    Reconstruir borde (quitar halo)
-                    <span class="help block-help">
-                      Recupera el color real del sujeto en el borde: sin halo blanco/verde/magenta
-                      sobre fondos oscuros.
-                    </span>
-                  </label>
-                </div>
+                <label class="check-field"><input type="checkbox" id="despeckle" checked /><span>Limpiar motas</span></label>
+                <label class="check-field"><input type="checkbox" id="spill" checked /><span>Quitar halo de color</span></label>
                 <div class="range-row range-row--spaced" id="spillAmountRow">
-                  <input
-                    type="range"
-                    id="spillAmount"
-                    min="0"
-                    max="100"
-                    value="95"
-                    aria-label="Fuerza de la reconstrucción de borde"
-                  />
+                  <input type="range" id="spillAmount" min="0" max="100" value="95" aria-label="Fuerza para quitar halo" />
                   <output class="range-value" id="spillAmountValue" for="spillAmount">95</output>
                 </div>
-
-                <div class="button-row">
-                  <button class="button button--small" id="resetSettings" type="button">
-                    ↺ Restablecer ajustes
-                  </button>
-                </div>
-              </div>
-
-              <div id="complexPanel" hidden>
-                <div class="complex-mode-note">
-                  <p><strong>Segmentación local (fotos y fondos complejos).</strong></p>
-                  <p>
-                    Este modo está reservado para un modelo de recorte que se ejecuta en tu equipo
-                    (WebGPU / WASM / ONNX). La arquitectura ya está preparada, pero
-                    <strong>el modelo aún no está incluido</strong>: el recorte cromático no es IA y
-                    no serviría bien aquí.
-                  </p>
-                  <p>Para ilustraciones, logos y chroma usa <strong>Fondo uniforme</strong>.</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section class="step" aria-labelledby="retouchStepTitle">
-            <div class="step__header">
-              <span class="step__number" aria-hidden="true">2</span>
-              <h2 id="retouchStepTitle">
-                Retoca a mano <span class="help inline-help">(opcional)</span>
-              </h2>
-            </div>
-            <div class="step__body">
-              <span class="field-label flush-top" id="toolLabel">Herramienta</span>
-              <div class="segmented-control" id="tool" aria-labelledby="toolLabel">
-                <button type="button" data-value="none" class="active">Mover</button>
-                <button type="button" data-value="wand">✨ Varita</button>
-                <button type="button" data-value="erase">Borrar</button>
-                <button type="button" data-value="restore">Restaurar</button>
-              </div>
-              <p class="help">
-                <strong>Varita:</strong> clic en un hueco para quitarlo.
-                <strong>Borrar/Restaurar:</strong> pincel suave; Restaurar recupera color y opacidad
-                originales.
-              </p>
-
-              <label class="field-label" for="brushSize">Tamaño del pincel</label>
-              <div class="range-row">
-                <input type="range" id="brushSize" min="6" max="240" value="44" />
-                <output class="range-value" id="brushSizeValue" for="brushSize">44</output>
-              </div>
-              <label class="field-label" for="brushHardness">Dureza del pincel</label>
-              <div class="range-row">
-                <input type="range" id="brushHardness" min="0" max="100" value="60" />
-                <output class="range-value" id="brushHardnessValue" for="brushHardness">60</output>
-              </div>
-
-              <div class="button-row">
-                <button class="button button--small" id="undo" type="button" disabled>
-                  ↶ Deshacer
-                </button>
-                <button class="button button--small" id="clearRetouch" type="button">
-                  Limpiar retoques
-                </button>
-              </div>
-              <div class="shortcut-list" aria-label="Atajos de teclado">
-                <span><kbd>W</kbd> varita</span>
-                <span><kbd>B</kbd> borrar</span>
-                <span><kbd>R</kbd> restaurar</span>
-                <span><kbd>V</kbd> mover</span>
-                <span><kbd>I</kbd> cuentagotas</span>
-                <span><kbd>⌘/Ctrl</kbd>+<kbd>Z</kbd> deshacer</span>
-              </div>
-            </div>
-          </section>
-
-          <section class="step" aria-labelledby="exportStepTitle">
-            <div class="step__header">
-              <span class="step__number" aria-hidden="true">3</span>
-              <h2 id="exportStepTitle">Exporta</h2>
-            </div>
-            <div class="step__body">
-              <div class="check-field">
-                <input type="checkbox" id="trimOutput" checked />
-                <label for="trimOutput">
-                  Recortar al contenido
-                  <span class="help block-help">
-                    Ajusta el lienzo al dibujo, a resolución completa.
-                  </span>
-                </label>
-              </div>
-              <div class="button-row">
-                <button class="button button--primary" id="downloadEditor" type="button">
-                  ⬇ Descargar PNG
-                </button>
-                <button class="button button--small" id="changeImage" type="button">
-                  Cambiar imagen
+                <button class="button button--small button--quiet advanced__reset" id="resetSettings" type="button">
+                  <svg class="icon"><use href="#icon-refresh" /></svg> Restablecer
                 </button>
               </div>
             </div>
-          </section>
-        </div>
+          </details>
 
-        <section class="card" aria-labelledby="previewTitle">
-          <div class="preview-header">
-            <h2 id="previewTitle">Vista previa</h2>
-            <div class="grow"></div>
-            <button class="button button--small" id="undoPreview" type="button" disabled>
-              ↶ Deshacer
+          <div class="panel-section panel-section--export">
+            <label class="check-field check-field--compact"><input type="checkbox" id="trimOutput" checked /><span>Recortar al contenido</span></label>
+            <button class="button button--primary button--full" id="downloadEditor" type="button">
+              <svg class="icon"><use href="#icon-download" /></svg> Descargar PNG
             </button>
-            <div
-              class="segmented-control segmented-control--compact"
-              id="previewBackground"
-              aria-label="Fondo de la vista previa"
-            >
-              <button
-                type="button"
-                data-value="checker"
-                class="active"
-                aria-label="Cuadrícula"
-                title="Cuadrícula"
-              >
-                ▦
-              </button>
-              <button type="button" data-value="white" aria-label="Blanco" title="Blanco">◻</button>
-              <button type="button" data-value="dark" aria-label="Oscuro" title="Oscuro">◼</button>
-              <button type="button" data-value="lime" aria-label="Lima" title="Lima">◧</button>
-            </div>
           </div>
+        </aside>
+
+        <section class="preview-card card" aria-labelledby="previewTitle">
+          <div class="preview-header">
+            <div>
+              <span class="eyebrow">Vista previa</span>
+              <h2 id="previewTitle">Antes y después</h2>
+            </div>
+            <div class="grow"></div>
+            <button class="button button--icon button--quiet tooltip" id="undoPreview" type="button" disabled aria-label="Deshacer" data-tooltip="Deshacer">
+              <svg class="icon"><use href="#icon-undo" /></svg>
+            </button>
+            <div class="preview-background" id="previewBackground" aria-label="Fondo de la vista previa">
+              <button type="button" data-value="checker" class="active tooltip" aria-label="Cuadrícula" data-tooltip="Cuadrícula"><svg class="icon"><use href="#icon-grid" /></svg></button>
+              <button type="button" data-value="white" class="tooltip swatch-button swatch-button--white" aria-label="Blanco" data-tooltip="Fondo blanco"><svg class="icon"><use href="#icon-circle" /></svg></button>
+              <button type="button" data-value="dark" class="tooltip swatch-button swatch-button--dark" aria-label="Oscuro" data-tooltip="Fondo oscuro"><svg class="icon"><use href="#icon-circle" /></svg></button>
+              <button type="button" data-value="lime" class="tooltip swatch-button swatch-button--lime" aria-label="Lima" data-tooltip="Fondo lima"><svg class="icon"><use href="#icon-circle" /></svg></button>
+            </div>
+            <button class="button button--small" id="changeImage" type="button">
+              <svg class="icon"><use href="#icon-image" /></svg> Cambiar
+            </button>
+          </div>
+
           <div class="preview-stage" id="previewStage">
             <div class="canvas-stack" id="canvasStack">
               <canvas id="resultCanvas" role="img" aria-label="Vista previa del recorte"></canvas>
               <canvas id="originalCanvas" aria-hidden="true"></canvas>
               <div class="comparison-divider" aria-hidden="true">
-                <div
-                  class="comparison-divider__handle"
-                  id="comparisonHandle"
-                  role="slider"
-                  aria-label="Comparar antes y después"
-                  aria-orientation="horizontal"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                  aria-valuenow="50"
-                  tabindex="0"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M8 7l-5 5 5 5V7zM16 7v10l5-5-5-5z" />
-                  </svg>
+                <div class="comparison-divider__handle" id="comparisonHandle" role="slider" aria-label="Comparar antes y después" aria-orientation="horizontal" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" tabindex="0">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M8 7 3 12l5 5V7Zm8 0v10l5-5-5-5Z" /></svg>
                 </div>
               </div>
-              <span class="comparison-label comparison-label--before">Antes</span>
-              <span class="comparison-label comparison-label--after">Después</span>
+              <span class="comparison-label comparison-label--before">Original</span>
+              <span class="comparison-label comparison-label--after">Resultado</span>
             </div>
             <div class="brush-ring" id="brushRing"></div>
+
+            <div class="processing-overlay" id="processingOverlay" hidden>
+              <div class="processing-card">
+                <span class="processing-orbit" aria-hidden="true"><svg class="icon"><use href="#icon-sparkles" /></svg></span>
+                <strong id="processingTitle">Analizando la imagen</strong>
+                <p id="processingMessage">La primera vez preparamos el motor local; después será más rápido.</p>
+                <div class="progress-track" id="progressTrack" aria-label="Progreso del recorte" role="progressbar">
+                  <span id="progressFill"></span>
+                </div>
+                <button class="button button--small button--quiet processing-skip" id="useQuickResult" type="button">
+                  Usar resultado rápido
+                </button>
+              </div>
+            </div>
           </div>
           <div class="image-meta" id="imageMeta"></div>
         </section>
       </div>
 
       <p class="status" id="status" role="status" aria-live="polite"></p>
-      <noscript>
-        <p class="status err">Bye-Ground necesita JavaScript para procesar imágenes localmente.</p>
-      </noscript>
+      <noscript><p class="status err">Bye-Ground necesita JavaScript para procesar imágenes.</p></noscript>
     </main>
   </body>
 </html>

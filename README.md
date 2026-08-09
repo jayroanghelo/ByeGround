@@ -1,74 +1,71 @@
 <p align="center">
-  <img src="favicon.svg" alt="Bye-Ground Logo" width="128" height="128" />
+  <img src="favicon.svg" alt="Logo de Bye-Ground" width="112" height="112" />
 </p>
 
 <h1 align="center">Bye-Ground</h1>
 
 <p align="center">
-  <strong>Elimina fondos de forma privada y al instante, ejecutado íntegramente en tu navegador.</strong><br>
-  Sin servidores, sin demoras y conservando una transparencia de máxima calidad en PNG.
+  <strong>Eliminación automática de fondos con IA local y retoque profesional.</strong><br />
+  La imagen se procesa en el navegador y se exporta como PNG transparente.
 </p>
 
-<p align="center">
-  <a href="#funcionalidades">Funcionalidades</a> •
-  <a href="#desarrollo-local">Desarrollo</a> •
-  <a href="#arquitectura">Arquitectura</a>
-</p>
+## Qué incluye
 
----
+- Recorte general mediante BiRefNet Lite 512 y ONNX Runtime Web.
+- Protección de sujeto para recuperar zonas claras cerradas que pertenecen a la figura, sin rescatar elementos aislados del fondo.
+- Aceleración WebGPU con fallback WASM.
+- Modelo ejecutado en un Web Worker para mantener fluida la interfaz.
+- Caché local del modelo; la primera ejecución descarga aproximadamente 94 MB y prioriza la calidad del recorte.
+- Resultado cromático rápido disponible si la IA no puede iniciarse o el usuario prefiere continuar sin esperar.
+- Varita con matting subpíxel, borrador, restauración y deshacer.
+- Comparador antes/después, fondos de prueba y exportación PNG recortada al contenido.
+- Interfaz responsive, accesible y con tema claro/oscuro.
 
-## ✨ Funcionalidades
+## Desarrollo local
 
-- **🔒 100% Privado**: Las imágenes nunca salen de tu dispositivo, todo ocurre en el cliente mediante Web APIs.
-- **🎨 Detección inteligente de color**: Algoritmo que muestrea el perímetro (mediana) y recorta fondos conectados o por color global.
-- **✂️ Recorte de Alta Precisión**: Antialias, contracción del borde, desenfoque (feather) y reconstrucción sin el temido efecto "halo".
-- **🪄 Herramientas de retoque**: Varita mágica con matting subpíxel, pincel para borrar, herramienta de restauración total y sistema *Deshacer*.
-- **👁️ UI/UX Moderna**: Interfaz amigable de 2026, tipografía _Outfit_, modo oscuro/claro nativo, comparador visual antes/después y fondos previsualizables.
-- **🖼️ Exportación Optimizada**: Descarga tu PNG a resolución completa con la opción de auto-recortar al lienzo útil.
-
-## 🚀 Desarrollo local
-
-El entorno está preparado para ser ultra liviano. Requiere **Node.js 20+** y **Python 3** (para servir los estáticos localmente).
-
-1. **Clona el repositorio** y entra en el directorio.
-2. **Inicia el servidor local**:
+Requiere Node.js 20.19 o posterior.
 
 ```bash
+npm install
 npm run dev
 ```
 
-El servidor estará disponible en `http://localhost:4173`.
+Vite abrirá el proyecto en `http://127.0.0.1:4173` o en el siguiente puerto libre.
 
-## 🧪 Validación y Pruebas
-
-Para asegurar la estabilidad del motor interno:
+## Validación
 
 ```bash
-# Ejecutar la suite de tests unitarios:
-npm test
-
-# Validar la sintaxis y tipos del código base:
 npm run check
+npm test
+npm run build
+npm audit
 ```
 
-## 🏗 Arquitectura del Proyecto
-
-El código está estructurado para una escalabilidad de componentes puros sin necesidad de pesados frameworks frontend:
+## Arquitectura
 
 ```text
 .
-├── favicon.svg                    # Logo y assets vectoriales
-├── index.html                     # Estructura semántica de la UI
+├── index.html
 ├── src/
 │   ├── core/
-│   │   ├── background-processor.js # Motor principal: pipeline y retoques
-│   │   ├── config.js               # Límites, defaults y presets del motor
-│   │   └── math.js                 # Utilidades algorítmicas puras
-│   ├── styles/                     # Arquitectura CSS (Tokens, Base, Componentes)
-│   ├── ui/                         # Controladores accesibles (Modo oscuro, eventos)
-│   └── main.js                     # Orquestación central DOM <-> Motor
-└── tests/                          # Suite de pruebas automatizadas
+│   │   ├── alpha-matte.js           # Fusión semántica y protección del sujeto
+│   │   ├── background-processor.js  # Composición, chroma y retoques
+│   │   ├── config.js                # Límites, defaults y presets
+│   │   └── math.js                  # Utilidades puras
+│   ├── engines/
+│   │   └── automatic-background-engine.js # API estable del motor IA
+│   ├── workers/
+│   │   └── background-removal.worker.js   # ONNX, pre/postproceso y caché
+│   ├── ui/                          # DOM, tooltips, controles, temas y exportación
+│   ├── styles/                      # Tokens, base, componentes y editor
+│   └── main.js                      # Orquestación de la aplicación
+└── tests/
 ```
 
-> [!NOTE]  
-> **Extensibilidad futura (Fondo Complejo)**: La segmentación local para fotografías complejas está planteada en la arquitectura para integrar un modelo cliente (WebGPU / WASM / ONNX) en el futuro, manteniendo la filosofía *Zero-Server*.
+El editor solo conoce la interfaz de `AutomaticBackgroundEngine`. El modelo puede cambiarse o trasladarse a un servicio remoto sin reescribir la UI ni el pipeline de retoque.
+
+## Privacidad y licencias
+
+Los píxeles no se envían a un servicio de inferencia: el navegador descarga el modelo y ejecuta el recorte localmente. El modelo y sus archivos se sirven desde Hugging Face en la primera ejecución.
+
+Consulta [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) para las licencias del runtime y del modelo.
