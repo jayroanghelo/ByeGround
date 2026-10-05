@@ -9,6 +9,14 @@
   La imagen se procesa en el navegador y se exporta como PNG transparente.
 </p>
 
+## Antes / después
+
+<p align="center">
+  <img src="docs/images/before-after.jpg" alt="Comparativa de Bye-Ground: imagen original y resultado con el fondo eliminado" width="100%" />
+</p>
+
+La comparación muestra el flujo principal de Bye-Ground: partir de una fotografía completa y obtener el sujeto recortado sobre transparencia, manteniendo el procesamiento en el navegador.
+
 ## Qué incluye
 
 - Recorte general mediante BiRefNet Lite 512 y ONNX Runtime Web.
